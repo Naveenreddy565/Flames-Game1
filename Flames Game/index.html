@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FLAMES Game</title>
+</head>
+<body>
+  <h1>FLAMES Game</h1>
+  <input type="text" id="name1" placeholder="First Name">
+  <input type="text" id="name2" placeholder="Second Name">
+  <button onclick="playFlames()">Check Relationship</button>
+  <p id="result"></p>
+
+  <script>
+    function playFlames() {
+      let name1 = document.getElementById('name1').value.toLowerCase().replace(/ /g, '');
+      let name2 = document.getElementById('name2').value.toLowerCase().replace(/ /g, '');
+
+      // Remove common letters
+      for (let ch of name1) {
+        if (name2.includes(ch)) {
+          name1 = name1.replace(ch, '');
+          name2 = name2.replace(ch, '');
+        }
+      }
+
+      let count = name1.length + name2.length;
+      let flames = ["F","L","A","M","E","S"];
+
+      while (flames.length > 1) {
+        let splitIndex = (count % flames.length) - 1;
+        if (splitIndex >= 0) {
+          flames = flames.slice(splitIndex + 1).concat(flames.slice(0, splitIndex));
+        } else {
+          flames = flames.slice(0, flames.length - 1);
+        }
+      }
+
+      const resultMap = {
+        F: "Friendship",
+        L: "Love",
+        A: "Affection",
+        M: "Marriage",
+        E: "Enemy",
+        S: "Sibling"
+      };
+
+      document.getElementById('result').innerText = "Relationship is: " + resultMap[flames[0]] + "\n\nchi navvuthunnava siggu ledu ra Neeku";
+    }
+  </script>
+</body>
+</html>
