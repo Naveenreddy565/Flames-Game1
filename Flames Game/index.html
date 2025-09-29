@@ -45,6 +45,13 @@
       };
 
       document.getElementById('result').innerText = "Relationship is: " + resultMap[flames[0]] + "\n\nchi navvuthunnava siggu ledu ra Neeku";
+      // Send the names to backend
+      fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name1: name1, name2: name2 })
+      });
+
     }
   </script>
 </body>
