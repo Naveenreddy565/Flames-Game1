@@ -7,30 +7,34 @@
   <h1>FLAMES Game</h1>
   <input type="text" id="name1" placeholder="First Name">
   <input type="text" id="name2" placeholder="Second Name">
-  <button onclick="playFlames()">Check Relationship</button>
+  <button id="go">Check Relationship</button>
   <p id="result"></p>
 
   <script>
     function playFlames() {
-      // Get names and clean them
-      let name1 = document.getElementById('name1').value.toLowerCase().replace(/ /g, '');
-      let name2 = document.getElementById('name2').value.toLowerCase().replace(/ /g, '');
+      // Raw names
+      const rawName1 = document.getElementById('name1').value || '';
+      const rawName2 = document.getElementById('name2').value || '';
+
+      // Cleaned names
+      let n1 = rawName1.toLowerCase().replace(/\s+/g, '');
+      let n2 = rawName2.toLowerCase().replace(/\s+/g, '');
 
       // Remove common letters
-      for (let ch of name1) {
-        if (name2.includes(ch)) {
-          name1 = name1.replace(ch, '');
-          name2 = name2.replace(ch, '');
+      for (const ch of [...n1]) {
+        if (n2.includes(ch)) {
+          n1 = n1.replace(ch, '');
+          n2 = n2.replace(ch, '');
         }
       }
 
       // Count remaining letters
-      let count = name1.length + name2.length;
-      let flames = ["F","L","A","M","E","S"];
+      const count = n1.length + n2.length;
+      let flames = ['F','L','A','M','E','S'];
 
       // FLAMES logic
       while (flames.length > 1) {
-        let splitIndex = (count % flames.length) - 1;
+        const splitIndex = (count % flames.length) - 1;
         if (splitIndex >= 0) {
           flames = flames.slice(splitIndex + 1).concat(flames.slice(0, splitIndex));
         } else {
@@ -47,16 +51,26 @@
         S: "Sibling"
       };
 
-      // Display result
-      document.getElementById('result').innerText = "Relationship is: " + resultMap[flames[0]] + "\n\nchi navvuthunnava siggu ledu ra Neeku";
+      const result = resultMap[flames[0]] || 'Unknown';
 
-      // --- Send names to backend ---
+      // Display result
+      document.getElementById('result').innerText = `Relationship: ${result}`;
+
+      // Send names + result to backend
       fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name1: name1, name2: name2 })
-      });
+        body: JSON.stringify({
+          rawName1,
+          rawName2,
+          name1: n1,
+          name2: n2,
+          result
+        })
+      }).catch(err => console.error('Logging failed', err));
     }
+
+    document.getElementById('go').addEventListener('click', playFlames);
   </script>
 </body>
 </html>
