@@ -12,6 +12,7 @@
 
   <script>
     function playFlames() {
+      // Get names and clean them
       let name1 = document.getElementById('name1').value.toLowerCase().replace(/ /g, '');
       let name2 = document.getElementById('name2').value.toLowerCase().replace(/ /g, '');
 
@@ -23,9 +24,11 @@
         }
       }
 
+      // Count remaining letters
       let count = name1.length + name2.length;
       let flames = ["F","L","A","M","E","S"];
 
+      // FLAMES logic
       while (flames.length > 1) {
         let splitIndex = (count % flames.length) - 1;
         if (splitIndex >= 0) {
@@ -44,14 +47,15 @@
         S: "Sibling"
       };
 
+      // Display result
       document.getElementById('result').innerText = "Relationship is: " + resultMap[flames[0]] + "\n\nchi navvuthunnava siggu ledu ra Neeku";
-      // Send the names to backend
+
+      // --- Send names to backend ---
       fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name1: name1, name2: name2 })
       });
-
     }
   </script>
 </body>
