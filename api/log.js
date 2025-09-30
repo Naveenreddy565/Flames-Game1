@@ -1,4 +1,4 @@
-// api/log.js (Vercel)
+// api/log.js
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -7,10 +7,7 @@ export default async function handler(req, res) {
   const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
   const SCRIPT_KEY = process.env.SCRIPT_KEY;
 
-  const payload = {
-    ...req.body,
-    key: SCRIPT_KEY // add the secret server-side
-  };
+  const payload = { ...req.body, key: SCRIPT_KEY };
 
   try {
     const r = await fetch(APPS_SCRIPT_URL, {
