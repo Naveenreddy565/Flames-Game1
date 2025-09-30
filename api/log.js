@@ -1,17 +1,28 @@
-// api/log.js
+// api/log.js (Vercel)
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
-export default function handler(req, res) {
-  if (req.method === 'POST') {
-    const { rawName1, rawName2, name1, name2, result } = req.body;
+  const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
+  const SCRIPT_KEY = process.env.SCRIPT_KEY;
 
-    console.log('---- New FLAMES Entry ----');
-    console.log(`Raw Input -> Name1: ${rawName1}, Name2: ${rawName2}`);
-    console.log(`Processed -> Name1: ${name1}, Name2: ${name2}`);
-    console.log(`Result    -> ${result}`);
-    console.log('--------------------------');
+  const payload = {
+    ...req.body,
+    key: SCRIPT_KEY // add the secret server-side
+  };
 
-    res.status(200).json({ message: "Names logged successfully!" });
-  } else {
-    res.status(405).json({ message: "Method not allowed" });
+  try {
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await r.text();
+    return res.status(200).json({ message: 'Forwarded', appsResponse: text });
+  } catch (err) {
+    console.error('Forward error', err);
+    return res.status(500).json({ message: 'Forward failed', error: err.toString() });
   }
 }
