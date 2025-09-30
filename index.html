@@ -2,6 +2,14 @@
 <html>
 <head>
   <title>FLAMES Game</title>
+  <style>
+    #resultImage {
+      display: none;
+      margin-top: 10px;
+      width: 200px; /* adjust size */
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
   <h1>FLAMES Game</h1>
@@ -9,6 +17,7 @@
   <input type="text" id="name2" placeholder="Second Name">
   <button id="go">Check Relationship</button>
   <p id="result"></p>
+  <img id="resultImage" src="https://media.makeameme.org/created/hey-idiot-go.jpg" alt="Funny Meme">
 
   <script>
     window.onload = function() {
@@ -33,6 +42,7 @@
         let count = n1.length + n2.length;
         if (count === 0) {
           document.getElementById('result').innerText = "All letters matched! Enter different names.";
+          document.getElementById('resultImage').style.display = "none";
           return;
         }
 
@@ -56,6 +66,7 @@
 
         // 6. Display result
         document.getElementById('result').innerText = `Relationship: ${result}`;
+        document.getElementById('resultImage').style.display = "block"; // show image
 
         // 7. Send data to Vercel serverless function
         console.log("Sending to Vercel:", { rawName1, rawName2, name1: n1, name2: n2, result });
