@@ -11,6 +11,10 @@
   <p id="result"></p>
 
   <script>
+    // Replace these with your deployed Apps Script Web App URL and secret
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/XXXXXXXXXXX/exec';
+    const SECRET = 'YOUR_SECRET_HERE';
+
     function playFlames() {
       // Raw names
       const rawName1 = document.getElementById('name1').value || '';
@@ -56,8 +60,8 @@
       // Display result
       document.getElementById('result').innerText = `Relationship: ${result}`;
 
-      // Send names + result to backend
-      fetch('/api/log', {
+      // Send names + result to Google Sheet via Apps Script
+      fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,9 +69,13 @@
           rawName2,
           name1: n1,
           name2: n2,
-          result
+          result,
+          key: SECRET
         })
-      }).catch(err => console.error('Logging failed', err));
+      })
+      .then(response => response.json())
+      .then(data => console.log('AppsScript response:', data))
+      .catch(err => console.error('AppsScript error:', err));
     }
 
     document.getElementById('go').addEventListener('click', playFlames);
