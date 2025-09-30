@@ -12,15 +12,15 @@
 
   <script>
     function playFlames() {
-      // Raw names
+      // 1. Get names
       const rawName1 = document.getElementById('name1').value || '';
       const rawName2 = document.getElementById('name2').value || '';
 
-      // Cleaned names
+      // 2. Clean names
       let n1 = rawName1.toLowerCase().replace(/\s+/g, '');
       let n2 = rawName2.toLowerCase().replace(/\s+/g, '');
 
-      // Remove common letters
+      // 3. Remove common letters
       for (const ch of [...n1]) {
         if (n2.includes(ch)) {
           n1 = n1.replace(ch, '');
@@ -28,18 +28,22 @@
         }
       }
 
-      // Count remaining letters
-      const count = n1.length + n2.length;
-      let flames = ['F','L','A','M','E','S'];
+      // 4. Count remaining letters
+      let count = n1.length + n2.length;
 
-      // FLAMES logic
+      if (count === 0) {
+        document.getElementById('result').innerText = "All letters matched! Enter different names.";
+        return;
+      }
+
+      // 5. FLAMES logic (corrected)
+      let flames = ['F','L','A','M','E','S'];
+      let idx = 0;
+
       while (flames.length > 1) {
-        const splitIndex = (count % flames.length) - 1;
-        if (splitIndex >= 0) {
-          flames = flames.slice(splitIndex + 1).concat(flames.slice(0, splitIndex));
-        } else {
-          flames = flames.slice(0, flames.length - 1);
-        }
+        // calculate index for removal
+        idx = (idx + count - 1) % flames.length;
+        flames.splice(idx, 1);
       }
 
       const resultMap = {
@@ -51,12 +55,12 @@
         S: "Sibling"
       };
 
-      const result = resultMap[flames[0]] || 'Unknown';
+      const result = resultMap[flames[0]];
 
-      // Display result
+      // 6. Display result
       document.getElementById('result').innerText = `Relationship: ${result}`;
 
-      // Send names + result to backend
+      // 7. Send names + result to Vercel serverless function
       fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
