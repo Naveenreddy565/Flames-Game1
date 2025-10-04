@@ -1,0 +1,405 @@
+Put your HTML text here<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 FLAMES Game: Relationship Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-fire: #ff6b81; 
+            --secondary-dark: #3a3a40;
+            --background-light: #f4f7f6;
+            --card-background: #ffffff;
+            --shadow-subtle: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Keyframes for animations */
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        /* --- MODAL POP-UP ANIMATION --- */
+        @keyframes modal-slide-in {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+
+        /* --- SHIMMER EFFECT for Modal Content --- */
+        @keyframes shimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+
+        /* --- EMOJI BURST ANIMATION --- */
+        @keyframes burst-fall {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translate(calc(var(--rand-x) * 100px), calc(var(--rand-y) * 100px)) scale(0) rotate(720deg); opacity: 0; }
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            background-image: radial-gradient(circle at top left, #ffafc4 0%, var(--background-light) 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--secondary-dark);
+            overflow-x: hidden; 
+        }
+
+        .container {
+            position: relative; 
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-subtle);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+        /* Input, Button styles */
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none; }
+        input[type="text"] { width: calc(100% - 60px); padding: 15px 15px 15px 45px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; transition: border-color 0.3s, box-shadow 0.3s; font-weight: 600; }
+        input[type="text"]:focus { border-color: var(--primary-fire); outline: none; box-shadow: 0 0 0 4px rgba(255, 107, 129, 0.15); }
+        #go { background-color: var(--primary-fire); color: white; border: none; padding: 14px 25px; border-radius: 10px; font-size: 1.1em; font-weight: 700; cursor: pointer; transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s; width: 100%; margin-top: 15px; box-shadow: 0 5px 15px rgba(255, 107, 129, 0.4); }
+        #go:hover { background-color: #f74f67; box-shadow: 0 5px 20px rgba(255, 107, 129, 0.6); }
+        #go:active { transform: scale(0.98); }
+
+        /* Buffer State Styles (Original dots version) */
+        #buffer-state { display: none; margin-top: 35px; padding: 20px; background-color: #ffe0e6; border-radius: 15px; color: var(--primary-fire); font-size: 1.2em; font-weight: 600; }
+        .dot-container { display: flex; justify-content: center; margin-top: 10px; }
+        .dot { width: 10px; height: 10px; margin: 0 5px; background-color: var(--primary-fire); border-radius: 50%; animation: pulse-dot 1s infinite ease-in-out; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* --- MODAL STYLES --- */
+        #result-modal {
+            display: none; 
+            position: fixed;
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); 
+            overflow: auto;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-subtle);
+            text-align: center;
+            width: 85%;
+            max-width: 400px;
+            animation: modal-slide-in 0.5s ease-out; 
+            border: 5px solid var(--primary-fire);
+            position: relative;
+        }
+        
+        /* Shimmer Class - Applied via JS on reveal */
+        .modal-content.shimmer-active {
+            background: linear-gradient(to right, #fff9f9 0%, #ffdfd8 50%, #fff9f9 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out;
+        }
+
+        .close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-btn:hover, .close-btn:focus {
+            color: var(--primary-fire);
+        }
+        
+        /* Result Content Styling (inside the modal) */
+        .result-title {
+            font-size: 2.2em; 
+            font-weight: 800; 
+            color: var(--primary-fire); 
+            text-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+        }
+        
+        .result-quote {
+            font-size: 1em;
+            font-style: italic;
+            color: var(--secondary-dark);
+            margin-bottom: 20px;
+        }
+        
+        #modal-result-image {
+            width: 90%; 
+            max-width: 280px;
+            border-radius: 12px;
+            border: 5px solid #ffdfd8;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 15px;
+        }
+
+        #modal-result.error .result-title {
+            color: #ff5e57;
+        }
+
+        /* Emoji Burst Styles */
+        #emoji-burst { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; pointer-events: none; z-index: 200; }
+        .burst-emoji { position: absolute; font-size: 20px; animation: burst-fall 1.5s forwards; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 FLAMES Calculator</h1>
+        
+        <div class="input-group">
+            <i class="fa-solid fa-user-circle"></i>
+            <input type="text" id="name1" placeholder="Your Name" aria-label="First Name">
+        </div>
+        
+        <div class="input-group">
+            <i class="fa-solid fa-heart"></i>
+            <input type="text" id="name2" placeholder="Their Name" aria-label="Second Name">
+        </div>
+        
+        <button id="go">Unveil Our Relationship</button>
+        
+        <div id="buffer-state">
+            <p>Analyzing the cosmic connection...</p>
+            <div class="dot-container">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="emoji-burst"></div>
+
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="modal-result">
+                </div>
+            <img id="modal-result-image" src="" alt="Relationship result graphic">
+        </div>
+    </div>
+    
+    <audio id="bufferSound" src="https://assets.mixkit.co/sfx/preview/mixkit-mechanical-fan-or-turbine-2615.mp3" preload="auto"></audio>
+    <audio id="positiveSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-success-alert-2060.mp3" preload="auto"></audio>
+    <audio id="negativeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-low-power-buzz-2882.mp3" preload="auto"></audio>
+
+    <script>
+        window.onload = function() {
+            const resultModal = document.getElementById('result-modal');
+            const modalContent = document.querySelector('.modal-content'); // Select content for shimmer
+            const modalResultDiv = document.getElementById('modal-result');
+            const modalImage = document.getElementById('modal-result-image');
+            const bufferState = document.getElementById('buffer-state');
+            const goButton = document.getElementById('go');
+            const emojiBurst = document.getElementById('emoji-burst');
+            const closeBtn = document.querySelector('.close-btn');
+
+            // Audio elements
+            const bufferAudio = document.getElementById('bufferSound');
+            const positiveAudio = document.getElementById('positiveSound');
+            const negativeAudio = document.getElementById('negativeSound');
+
+            // Data Maps (Unchanged)
+            const imageMap = {
+                F: "https://via.placeholder.com/280x150/6c5ce7/ffffff?text=BFFS+FOR+LIFE", L: "https://via.placeholder.com/280x150/ff4757/ffffff?text=TRUE+LOVE+MATCH", A: "https://via.placeholder.com/280x150/ffa502/ffffff?text=SO+MUCH+AFFECTION", M: "https://via.placeholder.com/280x150/2ed573/ffffff?text=WEDDING+BELLS", E: "https://via.placeholder.com/280x150/576574/ffffff?text=TOTAL+ENEMIES", S: "https://via.placeholder.com/280x150/3742fa/ffffff?text=FAMILY+BOND"
+            };
+            const resultMap = {
+                F: { title: "Friendship 🤝", quote: "You're destined to argue over who gets the last slice of pizza, not who says 'I love you' first." },
+                L: { title: "Love ❤️", quote: "Go buy that ring! (Just kidding... unless? 😉)" },
+                A: { title: "Affection 🤗", quote: "It's a strong vibe! Maybe you'll share a mutual addiction to the same TV show." },
+                M: { title: "Marriage 💍", quote: "Congratulations! You're now legally allowed to steal their fries forever." },
+                E: { title: "Enemy ⚔️", quote: "The cosmos says stay 50 feet apart. Maybe try the FLAMES game again with a cat's name instead." },
+                S: { title: "Sibling 👨‍👩‍👧‍👦", quote: "You have a pure, non-romantic bond. Don't worry, you're only allowed to annoy each other." }
+            };
+            const emojiSets = {
+                F: ['🤝', '😃', '⭐'], L: ['💖', '❤️', '💋'], A: ['😊', '🫂', '✨'], M: ['💍', '🍾', '🎉'], E: ['😠', '💥', '🔪'], S: ['👨‍👩‍👧', '🏠', '🤗']
+            };
+            
+            function triggerEmojiBurst(finalLetter) {
+                emojiBurst.innerHTML = ''; 
+                const emojis = emojiSets[finalLetter] || ['❓'];
+                const count = 30; 
+
+                for (let i = 0; i < count; i++) {
+                    const emoji = document.createElement('span');
+                    emoji.className = 'burst-emoji';
+                    emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+                    const randX = (Math.random() - 0.5) * 2; 
+                    const randY = (Math.random() - 0.5) * 2; 
+                    const delay = Math.random() * 0.2; 
+
+                    emoji.style.setProperty('--rand-x', randX);
+                    emoji.style.setProperty('--rand-y', randY);
+                    emoji.style.animationDelay = `${delay}s`;
+
+                    emojiBurst.appendChild(emoji);
+                }
+
+                setTimeout(() => {
+                    emojiBurst.innerHTML = '';
+                }, 1800);
+            }
+
+            function playSound(letter) {
+                if (letter === 'E') {
+                    negativeAudio.play().catch(e => console.log("Sound failed (browser restriction).", e));
+                } else {
+                    positiveAudio.play().catch(e => console.log("Sound failed (browser restriction).", e));
+                }
+            }
+            
+            function closeModal() {
+                resultModal.style.display = "none";
+                goButton.disabled = false;
+                modalContent.classList.remove('shimmer-active'); // Remove shimmer on close
+            }
+
+            function playFlames() {
+                // --- SETUP AND VALIDATION ---
+                const rawName1 = document.getElementById('name1').value.trim() || '';
+                const rawName2 = document.getElementById('name2').value.trim() || '';
+                
+                // Remove shimmer class immediately if modal was previously open
+                modalContent.classList.remove('shimmer-active');
+
+                if (!rawName1 || !rawName2) {
+                    modalContent.classList.add('error');
+                    modalResultDiv.innerHTML = `<div class="result-title">🚫 Error!</div><div class="result-quote">Please enter **both** names to start the magic!</div>`;
+                    modalImage.style.display = "none";
+                    resultModal.style.display = "block"; 
+                    return;
+                }
+
+                // --- START BUFFER STATE & AUDIO ---
+                resultModal.style.display = "none"; 
+                bufferState.style.display = "block"; 
+                goButton.disabled = true;
+                
+                bufferAudio.loop = true;
+                bufferAudio.volume = 0.5;
+                bufferAudio.play().catch(e => console.log("Buffer sound failed (browser restriction).", e));
+
+                // --- THE SURPRISE DELAY ---
+                const delayMs = 2500;
+                setTimeout(() => {
+                    bufferAudio.pause();
+                    bufferAudio.currentTime = 0;
+
+                    // --- FLAMES CALCULATION LOGIC ---
+                    let n1 = rawName1.toLowerCase().replace(/[^a-z]/g, '');
+                    let n2 = rawName2.toLowerCase().replace(/[^a-z]/g, '');
+                    let n1Arr = [...n1];
+                    let n2Arr = [...n2];
+
+                    for (let i = 0; i < n1Arr.length; i++) {
+                        const ch = n1Arr[i];
+                        const indexInN2 = n2Arr.indexOf(ch);
+                        if (indexInN2 !== -1) {
+                            n1Arr.splice(i, 1);
+                            n2Arr.splice(indexInN2, 1);
+                            i--; 
+                        }
+                    }
+                    
+                    let count = n1Arr.length + n2Arr.length;
+                    
+                    if (count === 0) {
+                        bufferState.style.display = "none";
+                        modalContent.classList.add('error');
+                        modalResultDiv.innerHTML = `<div class="result-title">🤯 Whoa!</div><div class="result-quote">All letters matched! Try two different names.</div>`;
+                        modalImage.style.display = "none";
+                        resultModal.style.display = "block";
+                        goButton.disabled = false;
+                        return;
+                    }
+
+                    let flames = ['F','L','A','M','E','S'];
+                    let idx = 0;
+                    while (flames.length > 1) {
+                        idx = (idx + count - 1) % flames.length;
+                        flames.splice(idx, 1);
+                    }
+
+                    const finalLetter = flames[0];
+                    const resultData = resultMap[finalLetter];
+
+                    // --- DISPLAY FINAL RESULT IN MODAL ---
+                    bufferState.style.display = "none";
+                    
+                    // Apply shimmer effect to modal content
+                    modalContent.classList.remove('error');
+                    modalContent.classList.add('shimmer-active'); 
+
+                    // Inject content
+                    modalResultDiv.innerHTML = `
+                        <div class="result-title">${resultData.title}</div>
+                        <div class="result-quote">"${resultData.quote}"</div>
+                    `;
+                    
+                    modalImage.src = imageMap[finalLetter];
+                    modalImage.alt = `Result: ${resultData.title}`;
+                    modalImage.style.display = "block";
+                    
+                    resultModal.style.display = "block"; 
+
+                    triggerEmojiBurst(finalLetter);
+                    playSound(finalLetter);
+
+                    // Vercel Logging (omitted for brevity)
+                }, delayMs);
+            }
+
+            // --- EVENT LISTENERS ---
+            goButton.addEventListener('click', playFlames);
+            
+            document.getElementById('name2').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    playFlames();
+                }
+            });
+
+            closeBtn.onclick = closeModal;
+
+            window.onclick = function(event) {
+                if (event.target == resultModal) {
+                    closeModal();
+                }
+            }
+            
+            // Initial state display for the user
+            modalResultDiv.innerHTML = `<div class="result-title" style="font-size:1.6em; color:var(--secondary-dark);">FLAMES Calculator Ready!</div><div class="result-quote">Enter names and click the button to unveil your destiny.</div>`;
+            modalImage.style.display = "none";
+            
+        };
+    </script>
+</body>
+</html>
